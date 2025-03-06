@@ -24,13 +24,13 @@ jobs:
           go-corset: true
 
       - name: Run Nightly tests
-        run: GOMEMLIMIT=20GiB ./gradlew nightlyTests
+        run: GOMEMLIMIT=32GiB ./gradlew nightlyTests
         env:
           JAVA_OPTS: -Dorg.gradle.daemon=false
           CORSET_FLAGS: disable
           GOCORSET_FLAGS: -vw --ansi-escapes=false --report --mir
           ZKEVM_BIN: "zkevm_for_old_replay_tests.bin"
-          NIGHTLY_TESTS_PARALLELISM: 3
+          NIGHTLY_TESTS_PARALLELISM: 2
 
       - name: Upload test report
         if: ${{ always() }}
