@@ -26,8 +26,9 @@ jobs:
           go-corset: true
 
       - name: Run Weekly tests
-        run: GOMEMLIMIT=96GiB ./gradlew weeklyTests
+        run: GOMEMLIMIT=32GiB ./gradlew weeklyTests
         env:
+          REFERENCE_TESTS_PARALLELISM: 3
           JAVA_OPTS: -Dorg.gradle.daemon=false
           CORSET_FLAGS: disable
           GOCORSET_FLAGS: -vw -b1024 --ansi-escapes=false --report --air
