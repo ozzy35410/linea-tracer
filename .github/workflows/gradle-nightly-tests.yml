@@ -24,7 +24,7 @@ jobs:
           go-corset: true
 
       - name: Run Nightly tests
-        run: GOMEMLIMIT=32GiB ./gradlew nightlyTests
+        run: GOMEMLIMIT=20GiB ./gradlew nightlyTests
         env:
           JAVA_OPTS: -Dorg.gradle.daemon=false
           CORSET_FLAGS: disable
