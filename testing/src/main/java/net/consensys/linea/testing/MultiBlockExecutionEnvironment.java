@@ -71,11 +71,11 @@ public class MultiBlockExecutionEnvironment {
 
   public void run() {
     ReplayExecutionEnvironment.builder()
-        .zkTracer(new ZkTracer(ToyExecutionEnvironmentV2.CHAIN_ID))
+        .zkTracer(new ZkTracer(ToyExecutionEnvironmentV2.CHAIN))
         .useCoinbaseAddressFromBlockHeader(true)
         .transactionProcessingResultValidator(this.transactionProcessingResultValidator)
         .build()
-        .replay(ToyExecutionEnvironmentV2.CHAIN_ID, this.buildConflationSnapshot());
+        .replay(ToyExecutionEnvironmentV2.CHAIN, this.buildConflationSnapshot());
   }
 
   private ConflationSnapshot buildConflationSnapshot() {
