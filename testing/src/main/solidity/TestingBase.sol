@@ -258,7 +258,8 @@ abstract contract TestingBase {
      */
     function deployWithCreate2(
         bytes32 _salt,
-        bytes memory _bytecode
+        bytes memory _bytecode,
+        bool revertUponFailure
     ) public payable returns (address addr) {
         assembly {
             let value := callvalue()
@@ -268,8 +269,10 @@ abstract contract TestingBase {
                 mload(_bytecode),
                 _salt
             )
-            if iszero(addr) {
+            if revertUponFailure {
+                if iszero(addr) {
                 revert(0, 0)
+                }
             }
         }
 
