@@ -106,11 +106,11 @@ abstract contract TestingBase {
     function getCallFunction(
         CallType _callType
     )
-        internal
-        pure
-        returns (
-            function(address, bytes memory, uint256, uint256) returns (bool)
-        )
+    internal
+    pure
+    returns (
+        function(address, bytes memory, uint256, uint256) returns (bool)
+    )
     {
         if (_callType == CallType.DELEGATE_CALL) {
             return doDelegateCall;
@@ -198,28 +198,28 @@ abstract contract TestingBase {
         /// @solidity memory-safe-assembly
         assembly {
             let n := mload(_data) // Let `l` be `n + 1`. +1 as we prefix a STOP opcode.
-            /**
-             * ---------------------------------------------------+
-             * Opcode | Mnemonic       | Stack     | Memory       |
-             * ---------------------------------------------------|
-             * 61 l   | PUSH2 l        | l         |              |
-             * 80     | DUP1           | l l       |              |
-             * 60 0xa | PUSH1 0xa      | 0xa l l   |              |
-             * 3D     | RETURNDATASIZE | 0 0xa l l |              |
-             * 39     | CODECOPY       | l         | [0..l): code |
-             * 3D     | RETURNDATASIZE | 0 l       | [0..l): code |
-             * F3     | RETURN         |           | [0..l): code |
-             * 00     | STOP           |           |              |
-             * ---------------------------------------------------+
-             * @dev Prefix the bytecode with a STOP opcode to ensure it cannot be called.
+        /**
+         * ---------------------------------------------------+
+         * Opcode | Mnemonic       | Stack     | Memory       |
+         * ---------------------------------------------------|
+         * 61 l   | PUSH2 l        | l         |              |
+         * 80     | DUP1           | l l       |              |
+         * 60 0xa | PUSH1 0xa      | 0xa l l   |              |
+         * 3D     | RETURNDATASIZE | 0 0xa l l |              |
+         * 39     | CODECOPY       | l         | [0..l): code |
+         * 3D     | RETURNDATASIZE | 0 l       | [0..l): code |
+         * F3     | RETURN         |           | [0..l): code |
+         * 00     | STOP           |           |              |
+         * ---------------------------------------------------+
+         * @dev Prefix the bytecode with a STOP opcode to ensure it cannot be called.
              * Also PUSH2 is used since max contract size cap is 24,576 bytes which is less than 2 ** 16.
              */
-            // Do a out-of-gas revert if `n + 1` is more than 2 bytes.
+        // Do a out-of-gas revert if `n + 1` is more than 2 bytes.
             mstore(
                 add(_data, gt(n, 0xfffe)),
                 add(0xfe61000180600a3d393df300, shl(0x40, n))
             )
-            // Deploy a new contract with the generated creation code.
+        // Deploy a new contract with the generated creation code.
             pointer := create(0, add(_data, 0x15), add(n, 0xb))
             if iszero(pointer) {
                 mstore(0x00, 0x30116425) // `DeploymentFailed()`.
@@ -258,8 +258,7 @@ abstract contract TestingBase {
      */
     function deployWithCreate2(
         bytes32 _salt,
-        bytes memory _bytecode,
-        bool revertUponFailure
+        bytes memory _bytecode
     ) public payable returns (address addr) {
         assembly {
             let value := callvalue()
@@ -269,11 +268,44 @@ abstract contract TestingBase {
                 mload(_bytecode),
                 _salt
             )
-            if revertUponFailure {
-                if iszero(addr) {
+            if iszero(addr) {
                 revert(0, 0)
-                }
             }
+        }
+
+        emit ContractCreated(addr);
+    }
+
+
+    function deployWithCreate2_withValue(
+        bytes32 _salt,
+        bytes memory _bytecode,
+        uint256 _value
+    ) public payable returns (address addr) {
+        assembly {
+            addr := create2(
+                _value,
+                add(_bytecode, 0x20),
+                mload(_bytecode),
+                _salt
+            )
+        }
+
+        emit ContractCreated(addr);
+    }
+
+    function deployWithCreate2_noRevert(
+        bytes32 _salt,
+        bytes memory _bytecode
+    ) public payable returns (address addr) {
+        assembly {
+            let value := callvalue()
+            addr := create2(
+                value,
+                add(_bytecode, 0x20),
+                mload(_bytecode),
+                _salt
+            )
         }
 
         emit ContractCreated(addr);
